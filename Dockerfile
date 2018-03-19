@@ -237,6 +237,7 @@ mkdir -p /etc/nginx/ssl/ && \
 rm -Rf /var/www/* && \
 mkdir /var/www/html/
 ADD .docker/conf/nginx-site.conf /etc/nginx/sites-available/default.conf
+ADD .docker/conf/magento.conf.sample /etc/nginx/sites-available/magento.conf.sample
 ADD .docker/conf/nginx-site-ssl.conf /etc/nginx/sites-available/default-ssl.conf
 RUN ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/default.conf
 
@@ -244,8 +245,10 @@ RUN ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/defau
 RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
     echo "upload_max_filesize = 100M"  >> ${php_vars} &&\
     echo "post_max_size = 100M"  >> ${php_vars} &&\
+    echo "max_execution_time = 1800"  >> ${php_vars} &&\
+    echo "zlib.output_compression = On"  >> ${php_vars} &&\
     echo "variables_order = \"EGPCS\""  >> ${php_vars} && \
-    echo "memory_limit = 128M"  >> ${php_vars} && \
+    echo "memory_limit = 2G"  >> ${php_vars} && \
     sed -i \
         -e "s/;catch_workers_output\s*=\s*yes/catch_workers_output = yes/g" \
         -e "s/pm.max_children = 5/pm.max_children = 4/g" \
@@ -267,7 +270,7 @@ RUN echo "cgi.fix_pathinfo=0" > ${php_vars} &&\
 COPY .docker/bin/* /usr/local/bin/
 RUN chmod +x /usr/local/bin/*
 
-RUN setup-cron
+#RUN setup-cron
 
 EXPOSE 443 80
 
